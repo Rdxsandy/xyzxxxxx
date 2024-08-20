@@ -1,6 +1,7 @@
-const file = require("../models/File");
+
 //localfileupload -> handler function
-const cloudinary = require ('cloudinary');
+const cloudinary = require("cloudinary");
+const File = require("../models/File");
 
 exports.localFileUpload = async (req, res) => {
   try {
@@ -23,65 +24,70 @@ exports.localFileUpload = async (req, res) => {
   }
 };
 
-function isFileTypeSupported(type,supportedTypes){
-
-  return supportedTypes.includes(type);
-}
-// function to upload something on cloundinary
-async function uploadFileToCloudinary(file, folder){
-  const options = {folder};
- return await cloudinary.uploader.upload(file.tempFilePath,options);
-}
 
 // handler to upload image
-exports.imageUpload = async (req,res)=>{
-
-try{
-const {name,tags, email}=req.body;
-console.log(name,tags, email);
-const file = req.files.imageFile;
-console.log(file);
-// validation
-const supportedTypes = ["jpg","png","jpeg"];
-const fileType= file.name.split('.')[1].toLowerCase();
-console.log("file type",fileType);
-if(!isFileTypeSupported(fileType,supportedTypes)){
-  return res.status(400).json({
-    success:false,
-    message: 'file type not supported'
-
-  })
-}
-// file format supported hai to ham upload karenge
-
-const response =  await uploadFileToCloudinary(file,"codehelp");
-console.log(response);
-
-// db me entry save karni hai
-// const fileData = await file.create({
-//   name,
-//   tags,
-//   imagaeUrl,
-//   emails
-// })
-
-res.json({
-  success:true,
-  message:'image uploaded  successfully'
-})
-
-
- 
-
-}
-catch(error){
-  console.error(error);
-  return res.status(400).json({
-    success:false,
-    message:'issue in image uploading'
-  })
-
+// Function to check if the file type is supported
+function isFileTypeSupported(type, supportedTypes) {
+  return supportedTypes.includes(type);
 }
 
-
+// Function to upload a file to Cloudinary
+async function uploadFileToCloudinary(file, folder) {
+  const options = { folder };
+  return await cloudinary.uploader.upload(file.tempFilePath, options);
 }
+
+// Handler to upload image
+exports.imageUpload = async (req, res) => {
+  try {
+    const { name, tags, email } = req.body;
+    console.log(name, tags, email);
+    const file = req.files.imageFile;
+    console.log(file);
+    // Check if file is present
+    if (!req.files || !req.files.imageFile) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+    console.log("test1");
+
+    // Validation
+    const supportedTypes = ["jpg", "png", "jpeg"];
+    const fileType = file.name.split(".").pop().toLowerCase();
+    console.log("file type", fileType);
+
+    if (!isFileTypeSupported(fileType, supportedTypes)) {
+      return res.status(400).json({
+        success: false,
+        message: "File type not supported",
+      });
+    }
+    console.log("test2");
+    // File format supported, proceed with upload
+    const response = await uploadFileToCloudinary(file, "codehelp");
+    console.log(response);
+    console.log("test3");
+    // Save entry to the database
+   const fileData = await File.create({
+      name,
+      imageUrl: response.secure_url,
+      tags,
+      email,
+   })
+    console.log("test4");
+
+    res.json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: fileData,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Issue in image uploading",
+    });
+  }
+};

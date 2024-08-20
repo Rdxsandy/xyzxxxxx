@@ -20,10 +20,17 @@ db.connect();
 // Cloudinary Connection
 const cloudinary = require("./config/cloudinary");
 cloudinary.cloudinaryConnect();
+app.get('/api/v1/test', (req, res) => {
+    res.json({
+      success: true,
+      message: "Test route is working!",
+    });
+  });
 
 // API Route Mount
 const Upload = require("./routes/FileUpload");
 app.use('/api/v1/upload', Upload);  // Fixed the route path
+
 
 // Activate Server
 app.listen(PORT, () => {

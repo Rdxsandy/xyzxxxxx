@@ -1,14 +1,14 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
 exports.cloudinaryConnect = () => {
   try {
     cloudinary.config({
-      cloud_name: process.env.CLOUD_NAME,
-      api_key: 183526381349727,
-      api_secret: process.env.API_SECRET,
+      cloud_name: "name",
+      api_key: api_key,
+      api_secret: "secret",
     });
-    console.log('Connected to Cloudinary');
+    console.log("Connected to Cloudinary");
   } catch (error) {
-    console.error('Error connecting to Cloudinary:', error.message);
+    console.error("Error connecting to Cloudinary:", error.message);
   }
 };
